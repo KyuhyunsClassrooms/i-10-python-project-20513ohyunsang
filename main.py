@@ -2,100 +2,86 @@
 # 이름 또는 학번: 
 # 프로젝트 주제: 
 
-# ============================================================
-# 사용 안내
-# ------------------------------------------------------------
-# 이 파일은 예시 골격입니다.
-# 그대로 제출하지 말고, 반드시 자신의 주제에 맞게 수정하세요.
-#
-# 필수 조건
-# 1. 2차원 리스트 사용
-# 2. 함수 2개 이상, 가능하면 3개 이상 분리
-# 3. 조건문 사용
-# 4. 반복문 사용
-# 5. 실행 결과 출력
-# ============================================================
+#코드
+import random
+import time
+
+def play_game():
+    print("=== 알파벳 일치 게임 (1인 1알파벳 버전) ===")
+    print("화면에 뜨는 랜덤 소문자 2개를 확인하세요.")
+    print("▶ 플레이어 1은 '첫 번째' 알파벳을 입력합니다.")
+    print("▶ 플레이어 2는 '두 번째' 알파벳을 입력합니다.")
+    print("대문자나 공백을 입력하면 오답 처리되며 즉시 게임 오버!")
+    print("-" * 50)
+
+    score = 0
+    limit_time = 5.0
+    round_num = 1
+
+    # 라운드 기록을 저장할 2차원 리스트
+    game_records = []
+
+    while True: # 게임 오버 전까지 무한 반복
+        # 소문자 a(97) ~ z(122) 중에서 랜덤하게 2개 생성
+        target1 = chr(random.randint(97, 122))
+        target2 = chr(random.randint(97, 122))
+        targets_str = f"{target1}, {target2}" # 기록용 문자열
+
+        print(f"\n★ [라운드 {round_num}] 제시된 알파벳: {target1} , {target2} ★")
+
+        # 플레이어 1은 첫 번째 알파벳(target1) 입력
+        start_time1 = time.time()
+        p1_input = input(f"플레이어 1 입력 (목표 '{target1}'): ")
+        end_time1 = time.time()
+
+        # 플레이어 2는 두 번째 알파벳(target2) 입력
+        start_time2 = time.time()
+        p2_input = input(f"플레이어 2 입력 (목표 '{target2}'): ")
+        end_time2 = time.time()
+
+        p1_duration = end_time1 - start_time1
+        p2_duration = end_time2 - start_time2
+
+        # 1. 제한시간 초과 검사
+        if p1_duration > limit_time:
+            print(f"\n[게임 오버] 플레이어 1 시간 초과! ({p1_duration:.2f}초)")
+            game_records.append(
+                [round_num, targets_str, p1_input, p2_input, "TIME OVER (P1)"]
+            )
+            break
+        if p2_duration > limit_time:
+            print(f"\n[게임 오버] 플레이어 2 시간 초과! ({p2_duration:.2f}초)")
+            game_records.append(
+                [round_num, targets_str, p1_input, p2_input, "TIME OVER (P2)"]
+            )
+            break
+
+        # 2. 정답 및 일치 여부 검사 (각자 자신의 목표 알파벳과 정확히 일치해야 함)
+        if p1_input == target1 and p2_input == target2:
+            score += 1
+            print(f"▶ 성공! 현재 점수: {score}점")
+            game_records.append(
+                [round_num, targets_str, p1_input, p2_input, "SUCCESS"]
+            )
+            round_num += 1
+        else:
+            print("\n[게임 오버] 알파벳을 잘못 입력했습니다!")
+            game_records.append(
+                [round_num, targets_str, p1_input, p2_input, "FAIL"]
+            )
+            break
+
+    # 게임 종료 후 전체 기록(2차원 리스트) 출력
+    print("\n" + "=" * 17 + " 게임 기록 " + "=" * 17)
+    print("[라운드] |  [정답]  | [P1 입력] | [P2 입력] | [결과]")
+    print("-" * 47)
+    for record in game_records:
+        print(
+            f"   {record[0]:<2}    |   {record[1]}  |     {record[2]:<2}    |     {record[3]:<2}    | {record[4]}"
+        )
+    print("=" * 47)
+    print(f"최종 점수: {score}점")
 
 
-# ------------------------------------------------------------
-# 1. 데이터 준비: 2차원 리스트
-# ------------------------------------------------------------
-# 아래 예시는 "활동 추천 프로그램"입니다.
-# 자신의 주제에 맞게 data를 만드세요.
-#
-# 현재 열의 의미:
-# 0번 열: 활동 이름
-# 1번 열: 필요한 시간(분)
-# 2번 열: 추천 기분
-# 3번 열: 활동 유형
-# ------------------------------------------------------------
-
-activities = [
-    ["산책하기", 30, "피곤", "운동"],
-    ["짧은 낮잠", 20, "피곤", "휴식"],
-    ["좋아하는 음악 듣기", 10, "우울", "휴식"],
-    ["문제집 3쪽 풀기", 40, "차분", "공부"],
-    ["방 정리하기", 25, "답답", "생활"],
-    ["친구에게 연락하기", 15, "우울", "소통"],
-]
-
-
-# ------------------------------------------------------------
-# 2. 함수 정의
-# ------------------------------------------------------------
-
-def show_intro():
-    """프로그램 제목과 안내를 출력한다."""
-    print("=" * 40)
-    print("AI 활용 자유 주제 파이썬 미니 프로젝트")
-    print("예시: 기분과 시간에 따른 활동 추천기")
-    print("=" * 40)
-
-
-def get_user_input():
-    """사용자에게 기분과 남은 시간을 입력받는다."""
-    mood = input("현재 기분을 입력하세요. 예: 피곤, 우울, 차분, 답답: ")
-    minutes = int(input("사용 가능한 시간을 분 단위로 입력하세요: "))
-    return mood, minutes
-
-
-def find_recommendations(data, mood, minutes):
-    """2차원 리스트를 반복하며 조건에 맞는 활동을 찾는다."""
-    results = []
-
-    for row in data:
-        name = row[0]
-        required_minutes = row[1]
-        recommended_mood = row[2]
-        activity_type = row[3]
-
-        # 조건문: 사용자의 기분과 시간이 활동 조건에 맞는지 판단한다.
-        if recommended_mood == mood and required_minutes <= minutes:
-            results.append([name, required_minutes, activity_type])
-
-    return results
-
-
-def print_result(results):
-    """추천 결과를 출력한다."""
-    print("\n[추천 결과]")
-
-    if len(results) == 0:
-        print("조건에 맞는 활동이 없습니다.")
-        print("시간을 늘리거나 다른 기분을 입력해 보세요.")
-    else:
-        for item in results:
-            print(f"- {item[0]} / {item[1]}분 / 유형: {item[2]}")
-
-
-def main():
-    show_intro()
-    mood, minutes = get_user_input()
-    results = find_recommendations(activities, mood, minutes)
-    print_result(results)
-
-
-# ------------------------------------------------------------
-# 3. 프로그램 실행
-# ------------------------------------------------------------
-main()
+if __name__ == "__main__":
+    play_game()
